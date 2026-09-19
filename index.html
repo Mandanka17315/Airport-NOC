@@ -2,151 +2,165 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CCZM NOC Zone Checker — Vadodara Airport</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CCZM Zone Checker — Vadodara Airport</title>
 <style>
   :root{
     --ink:#12211c;
     --paper:#eef1ec;
     --panel:#ffffff;
     --line:#c9d2c8;
-    --zone:#d23b34;
-    --zone-soft:rgba(210,59,52,.14);
-    --zone-line:rgba(210,59,52,.9);
-    --safe:#2f7d55;
-    --safe-soft:#e4f1e8;
-    --runway:#1a1a1a;
     --muted:#5c6b63;
     --focus:#0b6bcb;
+    --safe:#2f7d55;
+    --safe-soft:#e4f1e8;
+
+    --c-red:#d23b34;
+    --c-grey:#9aa39c;
+    --c-yellow:#e8b93a;
+    --c-violet:#a06bd6;
+    --c-green:#5fae4e;
+    --c-blue:#5c94d6;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
     font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
-    background:
-      radial-gradient(circle at 20% 0%, #f5f7f3, var(--paper) 60%);
+    background:radial-gradient(circle at 20% 0%, #f5f7f3, var(--paper) 60%);
     color:var(--ink);
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
   }
-  .wrap{max-width:820px;margin:0 auto;padding:28px 20px 64px}
-  header.masthead{
-    border-bottom:2px solid var(--ink);
-    padding-bottom:16px;margin-bottom:24px;
-  }
-  .kicker{
-    font-size:12.5px;letter-spacing:.14em;color:var(--muted);
-    font-weight:600;margin:0 0 6px;
-  }
-  h1{
-    font-size:clamp(26px,5.4vw,38px);
-    line-height:1.05;margin:0;font-weight:800;
-    font-variant-numeric:tabular-nums;
-  }
-  .sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch;line-height:1.5}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 64px}
+  header.masthead{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:22px}
+  .kicker{font-size:12.5px;letter-spacing:.14em;color:var(--muted);font-weight:600;margin:0 0 6px}
+  h1{font-size:clamp(24px,5.2vw,36px);line-height:1.08;margin:0;font-weight:800}
+  .sub{margin:10px 0 0;color:var(--muted);font-size:14.5px;max-width:64ch;line-height:1.5}
 
-  .action{
-    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
-    margin:22px 0 6px;
+  .tabs{display:flex;gap:8px;margin:22px 0 16px;border-bottom:1px solid var(--line)}
+  .tab{
+    appearance:none;border:none;background:none;cursor:pointer;
+    padding:10px 4px;font-size:14.5px;font-weight:650;color:var(--muted);
+    border-bottom:3px solid transparent;margin-bottom:-1px;
   }
+  .tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+  .panel{display:none}
+  .panel.active{display:block}
+
   button.locate{
-    appearance:none;border:none;cursor:pointer;
-    background:var(--ink);color:#f4f7f2;
-    font-size:16px;font-weight:650;
-    padding:15px 22px;border-radius:2px;
-    display:inline-flex;align-items:center;gap:11px;
-    transition:transform .08s ease, background .15s ease;
+    appearance:none;border:none;cursor:pointer;background:var(--ink);color:#f4f7f2;
+    font-size:15.5px;font-weight:650;padding:14px 20px;border-radius:2px;
+    display:inline-flex;align-items:center;gap:10px;width:100%;justify-content:center;
   }
   button.locate:hover{background:#1d3a30}
-  button.locate:active{transform:translateY(1px)}
-  button.locate:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   button.locate[disabled]{opacity:.55;cursor:progress}
-  button.locate svg{width:19px;height:19px;flex:none}
-  .hint{font-size:13px;color:var(--muted)}
+  button.locate svg{width:18px;height:18px;flex:none}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:8px;display:block;min-height:16px}
+  .hint.err{color:#a02e2e;font-weight:600}
 
-  /* Verdict banner */
-  .verdict{
-    margin:22px 0;border-radius:3px;overflow:hidden;
-    border:1px solid var(--line);background:var(--panel);
-    display:none;
+  .manual-row{display:flex;gap:10px;flex-wrap:wrap}
+  .field{flex:1;min-width:150px}
+  .field label{display:block;font-size:12px;font-weight:650;color:var(--muted);margin-bottom:5px;letter-spacing:.03em}
+  .field input{
+    width:100%;padding:11px 12px;font-size:15px;border:1px solid var(--line);
+    border-radius:2px;background:#fff;color:var(--ink);font-variant-numeric:tabular-nums;
   }
+  .field input:focus{outline:2px solid var(--focus);outline-offset:1px;border-color:var(--focus)}
+  .manual-help{font-size:12px;color:var(--muted);margin-top:6px}
+  .manual-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  button.secondary{
+    appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);
+    padding:10px 16px;border-radius:2px;font-size:13.5px;font-weight:600;cursor:pointer;
+  }
+  button.secondary:hover{background:#f2f5f0}
+  button.go{
+    appearance:none;border:none;background:var(--focus);color:#fff;padding:12px 22px;
+    border-radius:2px;font-size:14.5px;font-weight:650;cursor:pointer;flex:1;min-width:160px;
+  }
+  button.go:hover{filter:brightness(1.05)}
+
+  .verdict{margin:20px 0;border-radius:3px;overflow:hidden;border:1px solid var(--line);background:var(--panel);display:none}
   .verdict.show{display:block}
-  .verdict .flag{
-    padding:20px 22px;color:#fff;
-    display:flex;align-items:center;gap:16px;
-  }
-  .verdict.inside .flag{background:var(--zone)}
-  .verdict.outside .flag{background:var(--safe)}
-  .verdict .flag .mark{
-    width:44px;height:44px;flex:none;border-radius:50%;
-    background:rgba(255,255,255,.18);
-    display:grid;place-items:center;
-  }
-  .verdict .flag .mark svg{width:26px;height:26px}
-  .verdict .flag h2{margin:0;font-size:20px;font-weight:800;line-height:1.15}
-  .verdict .flag p{margin:3px 0 0;font-size:13.5px;opacity:.92}
-  .verdict .detail{
-    padding:16px 22px;font-size:14.5px;line-height:1.55;
-  }
+  .verdict .flag{padding:18px 20px;color:#fff;display:flex;align-items:center;gap:14px}
+  .verdict .flag .mark{width:42px;height:42px;flex:none;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center}
+  .verdict .flag .mark svg{width:24px;height:24px}
+  .verdict .flag h2{margin:0;font-size:19px;font-weight:800;line-height:1.15}
+  .verdict .flag p{margin:3px 0 0;font-size:13px;opacity:.92}
+  .verdict .detail{padding:15px 20px;font-size:14px;line-height:1.55}
   .verdict .detail strong{font-variant-numeric:tabular-nums}
 
-  .grid{
-    display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;
-  }
-  .cell{
-    background:var(--panel);border:1px solid var(--line);
-    border-radius:3px;padding:13px 15px;
-  }
-  .cell .lab{font-size:11.5px;letter-spacing:.08em;color:var(--muted);font-weight:600;margin:0 0 4px}
-  .cell .val{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums;margin:0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .cell{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 14px}
+  .cell .lab{font-size:11px;letter-spacing:.07em;color:var(--muted);font-weight:600;margin:0 0 4px}
+  .cell .val{font-size:14.5px;font-weight:650;font-variant-numeric:tabular-nums;margin:0}
 
-  /* Map */
-  .mapcard{
-    margin-top:24px;background:var(--panel);
-    border:1px solid var(--line);border-radius:3px;padding:16px;
+  .zonebar{margin-top:16px}
+  .zonerow{
+    display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid var(--line);
+    border-radius:3px;margin-bottom:7px;background:#fff;font-size:13px;
   }
-  .mapcard h3{margin:0 0 4px;font-size:15px;font-weight:700}
-  .mapcard .cap{margin:0 0 12px;font-size:13px;color:var(--muted)}
+  .zonerow .sw{width:16px;height:16px;border-radius:3px;flex:none}
+  .zonerow .lab{flex:1;color:var(--ink)}
+  .zonerow .lab b{font-weight:700}
+  .zonerow .lim{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px}
+  .zonerow.hit{border-width:2px;font-weight:650}
+  .zonerow.hit .lab{color:var(--ink)}
+
+  .mapcard{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:16px}
+  .mapcard h3{margin:0 0 4px;font-size:14.5px;font-weight:700}
+  .mapcard .cap{margin:0 0 12px;font-size:12.5px;color:var(--muted)}
   svg.plan{width:100%;height:auto;display:block;background:#f7f9f5;border:1px solid var(--line);border-radius:2px}
-  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:12.5px;color:var(--muted)}
-  .legend span{display:inline-flex;align-items:center;gap:7px}
-  .legend i{width:14px;height:14px;border-radius:3px;flex:none;display:inline-block}
 
-  .notes{
-    margin-top:26px;font-size:12.5px;color:var(--muted);line-height:1.6;
-    border-top:1px solid var(--line);padding-top:16px;
-  }
+  .notes{margin-top:24px;font-size:12.5px;color:var(--muted);line-height:1.6;border-top:1px solid var(--line);padding-top:14px}
   .notes p{margin:0 0 8px}
-  code{background:#e6ebe4;padding:1px 5px;border-radius:3px;font-size:12px}
+  code{background:#e6ebe4;padding:1px 5px;border-radius:3px;font-size:11.5px}
 
-  @media (max-width:520px){
-    .grid{grid-template-columns:1fr}
-    .verdict .flag{flex-direction:row}
-  }
-  @media (prefers-reduced-motion:reduce){
-    button.locate{transition:none}
-    .pulse{animation:none !important}
-  }
+  @media (max-width:520px){ .grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="masthead">
-    <p class="kicker">Vadodara Airport · CCZM (WGS 84) · Innermost obstacle zone</p>
-    <h1>Are you inside the NOC zone?</h1>
-    <p class="sub">Check whether your current position falls within the red <em>“NOC to be obtained from AAI”</em> area around Runway 04/22. Any construction inside this zone needs clearance from the Airports Authority of India.</p>
+    <p class="kicker">Vadodara Airport · CCZM (WGS 84) · Colour Legend Zones</p>
+    <h1>Which CCZM zone are you in?</h1>
+    <p class="sub">Checks a location against all Vadodara Airport CCZM colour bands — the red "NOC to be obtained from AAI" area plus the 60/80/100/120/140 m permissible-height rings — and shows the applicable limit.</p>
   </header>
 
-  <div class="action">
+  <div class="tabs" role="tablist">
+    <button class="tab active" id="tabGPS" role="tab">Use my location</button>
+    <button class="tab" id="tabManual" role="tab">Enter coordinates</button>
+  </div>
+
+  <div class="panel active" id="panelGPS">
     <button class="locate" id="btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
       Use my current location
     </button>
-    <span class="hint" id="hint">Your location is used only in this page and never sent anywhere.</span>
+    <span class="hint" id="hint">Needs an https:// page — GPS is blocked when a file is opened directly (file://). Use the "Enter coordinates" tab if this button doesn't prompt you.</span>
+  </div>
+
+  <div class="panel" id="panelManual">
+    <div class="manual-row">
+      <div class="field">
+        <label for="latIn">Latitude (decimal, °N)</label>
+        <input id="latIn" inputmode="decimal" placeholder="22.33100">
+      </div>
+      <div class="field">
+        <label for="lonIn">Longitude (decimal, °E)</label>
+        <input id="lonIn" inputmode="decimal" placeholder="73.22300">
+      </div>
+    </div>
+    <p class="manual-help">Get this from Google Maps: long-press your spot → the two numbers shown are latitude, longitude. Paste them in as-is.</p>
+    <div class="manual-actions">
+      <button class="go" id="checkBtn">Check this location</button>
+      <button class="secondary" id="pasteBtn">Paste "lat, lon"</button>
+    </div>
+    <span class="hint" id="hintManual"></span>
   </div>
 
   <div class="verdict" id="verdict">
-    <div class="flag">
+    <div class="flag" id="flag">
       <span class="mark" id="mark"></span>
       <div>
         <h2 id="vtitle"></h2>
@@ -155,84 +169,87 @@
     </div>
     <div class="detail" id="vdetail"></div>
     <div class="grid" id="stats"></div>
+
+    <div class="zonebar" id="zonebar"></div>
   </div>
 
   <div class="mapcard">
-    <h3>Your position relative to the zone</h3>
-    <p class="cap" id="mapcap">The red rectangle is the NOC zone. Press the button to plot your location.</p>
-    <svg class="plan" id="plan" viewBox="0 0 600 600" role="img" aria-label="Plan showing the NOC zone and your location"></svg>
-    <div class="legend">
-      <span><i style="background:var(--zone-soft);border:1.5px solid var(--zone-line)"></i> NOC zone (red area)</span>
-      <span><i style="background:var(--runway)"></i> Runway 04/22</span>
-      <span><i style="background:var(--focus)"></i> You</span>
-    </div>
+    <h3>Position relative to all zones</h3>
+    <p class="cap" id="mapcap">Rings from centre out: Red (NOC required) · Grey 60 m · Yellow 80 m · Violet 100 m · Green 120 m · Blue 140 m permissible top elevation (AMSL).</p>
+    <svg class="plan" id="plan" viewBox="0 0 600 600" role="img" aria-label="Plan of CCZM colour zones with your location"></svg>
   </div>
 
   <div class="notes">
-    <p><strong>How the check works.</strong> The zone is a runway-aligned rectangle (~2.48 km × ~1.32 km). Your point is tested against the actual polygon corners using a ray-casting geometry check, and the distance to the nearest edge is measured on the ground.</p>
-    <p><strong>Zone corners (WGS 84):</strong> NW 22.33186, 73.21080 · NE 22.34177, 73.23239 · SE 22.33086, 73.23739 · SW 22.32096, 73.21580.</p>
-    <p><strong>Accuracy.</strong> Corners were georeferenced from the CCZM map against the runway ends, so expect roughly ±50–100 m at the boundary. Phone GPS adds its own error (shown as accuracy). Near the edge, treat the result as indicative and verify against the official CCZM drawing <code>AAI/25-B-CCZM(GRID)/VADODARA/2016</code>. This tool does not replace an official AAI determination.</p>
+    <p><strong>Zone data.</strong> Red zone corners (WGS 84): NW 22.33186, 73.21080 · NE 22.34177, 73.23239 · SE 22.33086, 73.23739 · SW 22.32096, 73.21580. The five outer colour bands are modelled as rings centred on the Airport Reference Point (22.33004, 73.21884) at the radii printed on the official CCZM drawing: 2250 m / 4000 m / 6100 m / 9100 m / 15000 m.</p>
+    <p><strong>Accuracy.</strong> The red zone was georeferenced directly from the CCZM raster (±50–100 m). The outer rings are a radial approximation of AAI's true (slightly irregular, grid-cell-based) boundaries — reliable well inside or outside a band, less exact within ~150 m of a ring edge. For any construction proposal, confirm the applicable height limit against the official drawing <code>AAI/25-B-CCZM(GRID)/VADODARA/2016</code> or with the AAI NOC cell before proceeding. This tool is a field aid, not an official determination.</p>
   </div>
 </div>
 
 <script>
-// ---- NOC zone polygon (WGS84), ordered NW -> NE -> SE -> SW ----
-const ZONE = [
-  {name:"NW", lat:22.33186, lon:73.21080},
-  {name:"NE", lat:22.34177, lon:73.23239},
-  {name:"SE", lat:22.33086, lon:73.23739},
-  {name:"SW", lat:22.32096, lon:73.21580}
+// ---------- Zone data ----------
+const ARP = {lat:22.330042, lon:73.218844};
+
+// Precise red "NOC to be obtained" rectangle, WGS84, NW->NE->SE->SW
+const RED = [
+  {lat:22.33186, lon:73.21080},
+  {lat:22.34177, lon:73.23239},
+  {lat:22.33086, lon:73.23739},
+  {lat:22.32096, lon:73.21580}
 ];
-// Runway ends (for drawing): NE (04) and SW (22), from the CCZM NavAid data
+const RED_CENTER = {lat:22.33137, lon:73.22409};
+
+// Runway ends, for the plan drawing
 const RWY = [
-  {lat:22.33862, lon:73.23164},   // near 04 end
-  {lat:22.32713, lon:73.21497}    // near 22 end
+  {lat:22.33862, lon:73.23164},
+  {lat:22.32713, lon:73.21497}
 ];
-const CENTER = {lat:22.33137, lon:73.22409};
+
+// Outer colour bands: concentric rings around ARP, radii from the CCZM's own printed
+// distance annotations. Ordered innermost -> outermost; each ring's outer edge is its radius.
+const BANDS = [
+  {key:"grey",   label:"60 m AMSL or below",  color:"var(--c-grey)",   radius:2250},
+  {key:"yellow", label:"80 m AMSL or below",  color:"var(--c-yellow)", radius:4000},
+  {key:"violet", label:"100 m AMSL or below", color:"var(--c-violet)", radius:6100},
+  {key:"green",  label:"120 m AMSL or below", color:"var(--c-green)",  radius:9100},
+  {key:"blue",   label:"140 m AMSL or below", color:"var(--c-blue)",   radius:15000}
+];
 
 // ---------- geometry ----------
 function toRad(d){return d*Math.PI/180;}
-function haversine(a,b){ // metres
+function haversine(a,b){
   const R=6371000;
   const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lon-a.lon);
   const la1=toRad(a.lat), la2=toRad(b.lat);
   const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
   return 2*R*Math.asin(Math.sqrt(h));
 }
-// local metric projection (equirectangular) centred on zone
-const LAT0=CENTER.lat, MPD_LAT=111320, MPD_LON=111320*Math.cos(toRad(LAT0));
-function toXY(p){ return {x:(p.lon-CENTER.lon)*MPD_LON, y:(p.lat-CENTER.lat)*MPD_LAT}; }
-const ZXY = ZONE.map(toXY);
+const LAT0=RED_CENTER.lat, MPD_LAT=111320, MPD_LON=111320*Math.cos(toRad(LAT0));
+function toXY(p){ return {x:(p.lon-RED_CENTER.lon)*MPD_LON, y:(p.lat-RED_CENTER.lat)*MPD_LAT}; }
+const RXY = RED.map(toXY);
 
 function pointInPoly(pt, poly){
   let inside=false;
   for(let i=0,j=poly.length-1;i<poly.length;j=i++){
     const xi=poly[i].x, yi=poly[i].y, xj=poly[j].x, yj=poly[j].y;
-    const hit=((yi>pt.y)!==(yj>pt.y)) &&
-              (pt.x < (xj-xi)*(pt.y-yi)/(yj-yi)+xi);
+    const hit=((yi>pt.y)!==(yj>pt.y)) && (pt.x < (xj-xi)*(pt.y-yi)/(yj-yi)+xi);
     if(hit) inside=!inside;
   }
   return inside;
 }
 function distToSeg(p,a,b){
-  const dx=b.x-a.x, dy=b.y-a.y;
-  const L2=dx*dx+dy*dy;
-  let t = L2===0?0:((p.x-a.x)*dx+(p.y-a.y)*dy)/L2;
+  const dx=b.x-a.x, dy=b.y-a.y, L2=dx*dx+dy*dy;
+  let t=L2===0?0:((p.x-a.x)*dx+(p.y-a.y)*dy)/L2;
   t=Math.max(0,Math.min(1,t));
-  const cx=a.x+t*dx, cy=a.y+t*dy;
-  return Math.hypot(p.x-cx,p.y-cy);
+  return Math.hypot(p.x-(a.x+t*dx), p.y-(a.y+t*dy));
 }
-function distToBoundary(pXY){
+function distToPolyBoundary(pXY, poly){
   let m=Infinity;
-  for(let i=0,j=ZXY.length-1;i<ZXY.length;j=i++){
-    m=Math.min(m, distToSeg(pXY,ZXY[j],ZXY[i]));
-  }
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++) m=Math.min(m, distToSeg(pXY,poly[j],poly[i]));
   return m;
 }
 function bearing(a,b){
   const y=Math.sin(toRad(b.lon-a.lon))*Math.cos(toRad(b.lat));
-  const x=Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat))-
-          Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(toRad(b.lon-a.lon));
+  const x=Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat))-Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(toRad(b.lon-a.lon));
   return (Math.atan2(y,x)*180/Math.PI+360)%360;
 }
 function compass(b){
@@ -242,138 +259,244 @@ function compass(b){
 function dms(v,pos,neg){
   const h=v>=0?pos:neg; v=Math.abs(v);
   const d=Math.floor(v), m=Math.floor((v-d)*60), s=((v-d-m/60)*3600).toFixed(1);
-  return `${d}°${String(m).padStart(2,'0')}'${s}"${h}`;
+  return `${d}\u00b0${String(m).padStart(2,'0')}'${s}"${h}`;
 }
 function fmtDist(m){ return m>=1000 ? (m/1000).toFixed(2)+" km" : Math.round(m)+" m"; }
 
-// ---------- draw plan ----------
+function classify(user){
+  const distARP = haversine(user, ARP);
+  if(pointInPoly(toXY(user), RXY)){
+    return {kind:"red", distARP};
+  }
+  for(const b of BANDS){
+    if(distARP <= b.radius) return {kind:b.key, band:b, distARP};
+  }
+  return {kind:"outside", distARP};
+}
+
+// ---------- plan drawing ----------
 const plan=document.getElementById('plan');
-function buildProjection(extraPts){
-  const pts=[...ZXY, ...(extraPts||[])];
-  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-  for(const p of pts){minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);}
-  const pad=Math.max((maxX-minX),(maxY-minY))*0.18 + 120;
+function buildProjection(userXY){
+  const maxR = BANDS[BANDS.length-1].radius;
+  const arpXY = toXY(ARP);
+  let minX=arpXY.x-maxR, maxX=arpXY.x+maxR, minY=arpXY.y-maxR, maxY=arpXY.y+maxR;
+  if(userXY){
+    minX=Math.min(minX,userXY.x); maxX=Math.max(maxX,userXY.x);
+    minY=Math.min(minY,userXY.y); maxY=Math.max(maxY,userXY.y);
+  }
+  const w=maxX-minX, h=maxY-minY, pad=Math.max(w,h)*0.06;
   minX-=pad;maxX+=pad;minY-=pad;maxY+=pad;
-  const w=maxX-minX, h=maxY-minY, scale=600/Math.max(w,h);
-  const ox=(600-w*scale)/2, oy=(600-h*scale)/2;
-  return p=>({ X: ox+(p.x-minX)*scale, Y: 600-(oy+(p.y-minY)*scale) }); // flip Y (north up)
+  const scale=600/Math.max(maxX-minX,maxY-minY);
+  const ox=(600-(maxX-minX)*scale)/2, oy=(600-(maxY-minY)*scale)/2;
+  return p=>({X: ox+(p.x-minX)*scale, Y: 600-(oy+(p.y-minY)*scale)});
 }
 function drawPlan(userXY){
-  const proj=buildProjection(userXY?[userXY]:null);
-  const zpts=ZXY.map(proj);
+  const proj=buildProjection(userXY);
+  const arpXY=toXY(ARP), arpP=proj(arpXY);
+  let svg="";
+  // outermost first so inner rings paint on top
+  for(let i=BANDS.length-1;i>=0;i--){
+    const b=BANDS[i];
+    const rPx = (proj({x:arpXY.x+b.radius,y:arpXY.y}).X - arpP.X);
+    svg+=`<circle cx="${arpP.X.toFixed(1)}" cy="${arpP.Y.toFixed(1)}" r="${Math.abs(rPx).toFixed(1)}" fill="${b.color}" opacity="0.28" stroke="${b.color}" stroke-width="1.2"/>`;
+  }
+  const rpts=RXY.map(proj);
+  const poly=rpts.map(p=>`${p.X.toFixed(1)},${p.Y.toFixed(1)}`).join(' ');
+  svg+=`<polygon points="${poly}" fill="var(--c-red)" fill-opacity="0.55" stroke="var(--c-red)" stroke-width="2.5"/>`;
   const rw=RWY.map(p=>proj(toXY(p)));
-  const poly=zpts.map(p=>`${p.X.toFixed(1)},${p.Y.toFixed(1)}`).join(' ');
-  let svg=`
-    <defs>
-      <pattern id="hatch" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-        <rect width="10" height="10" fill="var(--zone-soft)"/>
-        <line x1="0" y1="0" x2="0" y2="10" stroke="var(--zone-line)" stroke-width="1" opacity=".25"/>
-      </pattern>
-    </defs>
-    <polygon points="${poly}" fill="url(#hatch)" stroke="var(--zone-line)" stroke-width="2.5"/>
-    <line x1="${rw[0].X.toFixed(1)}" y1="${rw[0].Y.toFixed(1)}" x2="${rw[1].X.toFixed(1)}" y2="${rw[1].Y.toFixed(1)}"
-          stroke="var(--runway)" stroke-width="4" stroke-linecap="round"/>
-    <text x="${rw[0].X.toFixed(1)}" y="${(rw[0].Y-10).toFixed(1)}" font-size="13" fill="#333" text-anchor="middle" font-weight="700">04</text>
-    <text x="${rw[1].X.toFixed(1)}" y="${(rw[1].Y+20).toFixed(1)}" font-size="13" fill="#333" text-anchor="middle" font-weight="700">22</text>
-  `;
-  // north arrow
+  svg+=`<line x1="${rw[0].X.toFixed(1)}" y1="${rw[0].Y.toFixed(1)}" x2="${rw[1].X.toFixed(1)}" y2="${rw[1].Y.toFixed(1)}" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>`;
   svg+=`<g transform="translate(560,44)"><line x1="0" y1="26" x2="0" y2="-14" stroke="#333" stroke-width="2"/><path d="M0,-20 L6,-6 L-6,-6 Z" fill="#333"/><text x="0" y="42" font-size="12" fill="#555" text-anchor="middle" font-weight="700">N</text></g>`;
   if(userXY){
     const u=proj(userXY);
-    svg+=`
-      <circle class="pulse" cx="${u.X.toFixed(1)}" cy="${u.Y.toFixed(1)}" r="16" fill="var(--focus)" opacity=".18">
-        <animate attributeName="r" values="10;22;10" dur="1.8s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values=".28;.05;.28" dur="1.8s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="${u.X.toFixed(1)}" cy="${u.Y.toFixed(1)}" r="7" fill="var(--focus)" stroke="#fff" stroke-width="2.5"/>
-      <text x="${u.X.toFixed(1)}" y="${(u.Y-14).toFixed(1)}" font-size="12.5" fill="var(--focus)" text-anchor="middle" font-weight="800">You</text>`;
+    svg+=`<circle cx="${u.X.toFixed(1)}" cy="${u.Y.toFixed(1)}" r="16" fill="var(--focus)" opacity=".2">
+      <animate attributeName="r" values="10;22;10" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values=".28;.05;.28" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="${u.X.toFixed(1)}" cy="${u.Y.toFixed(1)}" r="7" fill="var(--focus)" stroke="#fff" stroke-width="2.5"/>
+    <text x="${u.X.toFixed(1)}" y="${(u.Y-14).toFixed(1)}" font-size="12.5" fill="var(--focus)" text-anchor="middle" font-weight="800">You</text>`;
   }
   plan.innerHTML=svg;
 }
 drawPlan(null);
 
-// ---------- locate flow ----------
-const btn=document.getElementById('btn');
-const hint=document.getElementById('hint');
+// ---------- rendering ----------
 const verdict=document.getElementById('verdict');
 const mark=document.getElementById('mark');
+const flag=document.getElementById('flag');
 const vtitle=document.getElementById('vtitle');
 const vsub=document.getElementById('vsub');
 const vdetail=document.getElementById('vdetail');
 const stats=document.getElementById('stats');
+const zonebar=document.getElementById('zonebar');
 const mapcap=document.getElementById('mapcap');
 
-const ICON_IN=`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>`;
-const ICON_OUT=`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+const ICON_STOP=`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>`;
+const ICON_OK=`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+const ICON_INFO=`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>`;
 
-function render(user, accuracy){
-  const uXY=toXY(user);
-  const inside=pointInPoly(uXY, ZXY);
-  const edge=distToBoundary(uXY);
-  const toCenter=haversine(user, CENTER);
-  const brg=bearing(user, CENTER);
+function colorFor(kind){
+  if(kind==="red") return "var(--c-red)";
+  if(kind==="outside") return "var(--safe)";
+  const b=BANDS.find(x=>x.key===kind);
+  return b ? b.color : "var(--muted)";
+}
 
-  verdict.classList.remove('inside','outside');
-  verdict.classList.add('show', inside?'inside':'outside');
+function renderZoneBar(result){
+  let html = `<div class="zonerow${result.kind==='red'?' hit':''}" style="border-color:var(--c-red)">
+    <span class="sw" style="background:var(--c-red)"></span>
+    <span class="lab"><b>Red</b> — NOC to be obtained from AAI</span>
+    <span class="lim">innermost</span>
+  </div>`;
+  for(const b of BANDS){
+    const hit = result.kind===b.key;
+    html += `<div class="zonerow${hit?' hit':''}" style="border-color:${b.color}">
+      <span class="sw" style="background:${b.color}"></span>
+      <span class="lab"><b>${b.label}</b></span>
+      <span class="lim">within ${fmtDist(b.radius)} of ARP</span>
+    </div>`;
+  }
+  zonebar.innerHTML = html;
+}
 
-  if(inside){
-    mark.innerHTML=ICON_IN;
-    vtitle.textContent="Inside the NOC zone";
-    vsub.textContent="NOC to be obtained from AAI";
-    vdetail.innerHTML=`Your position is <strong>inside</strong> the red zone. Construction here requires prior height clearance / NOC from the Airports Authority of India. You are about <strong>${fmtDist(edge)}</strong> in from the nearest boundary.`;
-  }else{
-    mark.innerHTML=ICON_OUT;
-    vtitle.textContent="Outside the NOC zone";
-    vsub.textContent="Not within the red “NOC to be obtained” area";
-    vdetail.innerHTML=`Your position is <strong>outside</strong> the red zone. The nearest zone boundary is about <strong>${fmtDist(edge)}</strong> away (zone lies to your ${compass((brg+180)%360)}). Other CCZM colour zones may still apply — check the full drawing for permissible building height at your plot.`;
+function render(user, accuracy, source){
+  const result = classify(user);
+  const uXY = toXY(user);
+  const edgeRed = distToPolyBoundary(uXY, RXY);
+  const brgToARP = bearing(user, ARP);
+
+  verdict.classList.add('show');
+  flag.style.background = colorFor(result.kind);
+
+  if(result.kind==="red"){
+    mark.innerHTML=ICON_STOP;
+    vtitle.textContent="Inside the RED zone — NOC required";
+    vsub.textContent="NOC to be obtained from AAI before any construction";
+    vdetail.innerHTML=`This position is <strong>inside the red zone</strong>, about <strong>${fmtDist(edgeRed)}</strong> in from the nearest red boundary. Any building or structure here needs prior clearance from the Airports Authority of India — no permissible height applies without an NOC.`;
+  } else if(result.kind==="outside"){
+    mark.innerHTML=ICON_OK;
+    vtitle.textContent="Outside all CCZM bands";
+    vsub.textContent="Beyond the 140 m outer ring";
+    vdetail.innerHTML=`This position is <strong>outside every CCZM colour zone</strong> shown on the drawing (beyond ${fmtDist(BANDS[BANDS.length-1].radius)} from the Airport Reference Point). No CCZM height restriction from this map applies here.`;
+  } else {
+    const b = result.band;
+    mark.innerHTML=ICON_INFO;
+    vtitle.textContent=`${b.key[0].toUpperCase()+b.key.slice(1)} zone — ${b.label}`;
+    vsub.textContent="Not in the red zone — a permissible height limit applies";
+    vdetail.innerHTML=`This position falls in the <strong>${b.key}</strong> band: buildings are <strong>permitted up to ${b.label}</strong> (above mean sea level) without needing individual AAI clearance — subject to the notification's standard conditions. It is about <strong>${fmtDist(edgeRed)}</strong> from the red zone boundary.`;
   }
 
-  const acc = accuracy!=null ? `± ${Math.round(accuracy)} m` : "—";
+  const acc = accuracy!=null ? `\u00b1 ${Math.round(accuracy)} m` : "manual entry";
   stats.innerHTML=`
-    <div class="cell"><p class="lab">YOUR LATITUDE</p><p class="val">${dms(user.lat,'N','S')}</p></div>
-    <div class="cell"><p class="lab">YOUR LONGITUDE</p><p class="val">${dms(user.lon,'E','W')}</p></div>
-    <div class="cell"><p class="lab">DIST. TO ZONE EDGE</p><p class="val">${fmtDist(edge)}</p></div>
-    <div class="cell"><p class="lab">DIST. TO ZONE CENTRE</p><p class="val">${fmtDist(toCenter)} · ${compass(brg)}</p></div>
-    <div class="cell"><p class="lab">GPS ACCURACY</p><p class="val">${acc}</p></div>
+    <div class="cell"><p class="lab">LATITUDE</p><p class="val">${dms(user.lat,'N','S')}</p></div>
+    <div class="cell"><p class="lab">LONGITUDE</p><p class="val">${dms(user.lon,'E','W')}</p></div>
+    <div class="cell"><p class="lab">DIST. TO RED ZONE EDGE</p><p class="val">${fmtDist(edgeRed)}</p></div>
+    <div class="cell"><p class="lab">DIST. TO AIRPORT (ARP)</p><p class="val">${fmtDist(result.distARP)} \u00b7 ${compass(brgToARP)}</p></div>
+    <div class="cell"><p class="lab">SOURCE / ACCURACY</p><p class="val">${source||''} ${acc}</p></div>
     <div class="cell"><p class="lab">DECIMAL DEGREES</p><p class="val">${user.lat.toFixed(5)}, ${user.lon.toFixed(5)}</p></div>
   `;
-  mapcap.textContent = inside
-    ? "You are inside the red NOC zone."
-    : `You are outside the red NOC zone — about ${fmtDist(edge)} from the boundary.`;
+  renderZoneBar(result);
+  mapcap.textContent = result.kind==="red"
+    ? `Inside the red zone \u2014 ${fmtDist(edgeRed)} from its boundary.`
+    : result.kind==="outside"
+      ? "Outside all mapped CCZM bands."
+      : `In the ${result.band.key} band (${result.band.label}).`;
   drawPlan(uXY);
-  verdict.scrollIntoView({behavior:'smooth',block:'nearest'});
+  verdict.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ---------- tabs ----------
+const tabGPS=document.getElementById('tabGPS'), tabManual=document.getElementById('tabManual');
+const panelGPS=document.getElementById('panelGPS'), panelManual=document.getElementById('panelManual');
+tabGPS.addEventListener('click',()=>{tabGPS.classList.add('active');tabManual.classList.remove('active');panelGPS.classList.add('active');panelManual.classList.remove('active');});
+tabManual.addEventListener('click',()=>{tabManual.classList.add('active');tabGPS.classList.remove('active');panelManual.classList.add('active');panelGPS.classList.remove('active');});
+
+// ---------- GPS flow ----------
+const btn=document.getElementById('btn');
+const hint=document.getElementById('hint');
+
+function validLatLon(lat,lon){
+  return isFinite(lat)&&isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 && !(lat===0&&lon===0);
 }
 
 btn.addEventListener('click',()=>{
+  hint.classList.remove('err');
   if(!('geolocation' in navigator)){
-    hint.textContent="This browser doesn't support location. Try a different browser or device.";
+    hint.textContent="This browser doesn't support location. Use \u201cEnter coordinates\u201d instead.";
+    hint.classList.add('err');
+    return;
+  }
+  if(window.isSecureContext===false){
+    hint.textContent="This page isn't loaded securely (needs https:// or localhost), so Chrome will block the location prompt. Use \u201cEnter coordinates\u201d, or open this file from a hosted https:// link.";
+    hint.classList.add('err');
     return;
   }
   btn.disabled=true;
   const orig=btn.innerHTML;
-  btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" opacity=".25"/><path d="M21 12a9 9 0 0 0-9-9"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.9s" repeatCount="indefinite"/></path></svg> Locating…`;
-  hint.textContent="Waiting for GPS…";
+  btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" opacity=".25"/><path d="M21 12a9 9 0 0 0-9-9"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.9s" repeatCount="indefinite"/></path></svg> Locating\u2026`;
+  hint.textContent="Waiting for GPS\u2026";
   navigator.geolocation.getCurrentPosition(
     pos=>{
       btn.disabled=false; btn.innerHTML=orig;
-      hint.textContent="Location found. Press again to refresh.";
-      render(
-        {lat:pos.coords.latitude, lon:pos.coords.longitude},
-        pos.coords.accuracy
-      );
+      const {latitude:lat, longitude:lon, accuracy}=pos.coords;
+      if(!validLatLon(lat,lon)){
+        hint.textContent="Got an invalid reading (0,0) from the device. Try again in open sky, or use \u201cEnter coordinates\u201d.";
+        hint.classList.add('err');
+        return;
+      }
+      hint.textContent=`Location found (\u00b1${Math.round(accuracy)} m). Press again to refresh.`;
+      render({lat, lon}, accuracy, "GPS");
     },
     err=>{
       btn.disabled=false; btn.innerHTML=orig;
       const msg={
-        1:"Location permission denied. Allow location access and try again.",
-        2:"Position unavailable right now. Move to open sky and retry.",
-        3:"Timed out getting your location. Try again."
-      }[err.code] || "Couldn't get your location. Try again.";
+        1:"Location permission denied. Allow location access for this site/app and try again \u2014 or use \u201cEnter coordinates\u201d.",
+        2:"Position unavailable right now. Move to open sky and retry, or use \u201cEnter coordinates\u201d.",
+        3:"Timed out getting your location. Try again, or use \u201cEnter coordinates\u201d."
+      }[err.code] || "Couldn't get your location. Use \u201cEnter coordinates\u201d instead.";
       hint.textContent=msg;
+      hint.classList.add('err');
     },
     {enableHighAccuracy:true, timeout:15000, maximumAge:0}
   );
 });
+
+// ---------- manual entry flow ----------
+const latIn=document.getElementById('latIn'), lonIn=document.getElementById('lonIn');
+const checkBtn=document.getElementById('checkBtn'), pasteBtn=document.getElementById('pasteBtn');
+const hintManual=document.getElementById('hintManual');
+
+checkBtn.addEventListener('click',()=>{
+  hintManual.classList.remove('err');
+  const lat=parseFloat(latIn.value), lon=parseFloat(lonIn.value);
+  if(!validLatLon(lat,lon)){
+    hintManual.textContent="Enter valid decimal coordinates \u2014 latitude around 22.x, longitude around 73.x for this area.";
+    hintManual.classList.add('err');
+    return;
+  }
+  hintManual.textContent="Checked.";
+  render({lat,lon}, null, "Manual");
+});
+
+pasteBtn.addEventListener('click', async ()=>{
+  hintManual.classList.remove('err');
+  try{
+    const text = await navigator.clipboard.readText();
+    const m = text.match(/(-?\d+\.\d+)[,\s]+(-?\d+\.\d+)/);
+    if(m){
+      latIn.value = m[1]; lonIn.value = m[2];
+      hintManual.textContent = "Pasted from clipboard \u2014 press \u201cCheck this location\u201d.";
+    } else {
+      hintManual.textContent = "Clipboard didn't contain a \u201clat, lon\u201d pair. Type the values in manually.";
+      hintManual.classList.add('err');
+    }
+  }catch(e){
+    hintManual.textContent = "Couldn't read the clipboard (browser permission). Type the values in manually.";
+    hintManual.classList.add('err');
+  }
+});
+
+latIn.addEventListener('keydown', e=>{ if(e.key==='Enter') checkBtn.click(); });
+lonIn.addEventListener('keydown', e=>{ if(e.key==='Enter') checkBtn.click(); });
 </script>
 </body>
 </html>
